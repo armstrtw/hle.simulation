@@ -47,6 +47,18 @@ Cube<double> update_prob(vec& b4, mat& b5, mat& b6, mat& b7) {
 }
 
 
+std::function<const mat (const mat&)> noramlize_by_rowsum = [](const mat& x) {
+  const uvec z(zeros<uvec>(x.n_cols));
+  colvec rs = sum(x,1);
+  return x / rs.cols(z);
+};
+
+// mat noramlize_by_rowsum(const mat& x) {
+//   const uvec z(zeros<uvec>(x.n_cols));
+//   colvec rs = sum(x,1);
+//   return x / rs.cols(z);
+// }
+
 SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<double>& nr_healthy, const Cube<double>& nr_resp, const vec& adj_geo, const vec& numNeigh_geo, const int sumNumNeigh_geo) {
   // sex  s = 0,1
   // area i = 0..(N-1)
@@ -186,7 +198,8 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //   f7[s,x] ~ dgamma(1,1)
   // }}
   m.link<Gamma>(f3,1,1);
-  //m.link<Lambda1>(b3,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f3);
+  //m.link<Lambda1>(b3,noramlize_by_rowsum,f3);
+  m.lambda(b3,noramlize_by_rowsum,f3);
   m.link<Gamma>(f7,1,1);
   //m.link<Lambda1>(b7,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f7);
 
