@@ -21,7 +21,7 @@ using namespace cppbugs;
 using std::cout;
 using std::endl;
 
-Cube<double> update_mrate(vec& b0, mat& b1, mat& b2, mat& b3) {
+Cube<double> update_mrate(const vec& b0, const arma::Mat<double>& b1, const arma::Mat<double>& b2, const arma::Mat<double>& b3) {
   Cube<double> ans;
   for(int s = 0; s < b0.n_elem; ++s) {
     for(int i = 0; i < b2.n_cols; ++i) {
@@ -199,7 +199,6 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //   f7[s,x] ~ dgamma(1,1)
   // }}
   m.link<Gamma>(f3,1,1);
-  //m.link<Lambda1>(b3,noramlize_by_rowsum,f3);
   m.lambda(b3,noramlize_by_rowsum,f3);
   m.link<Gamma>(f7,1,1);
   m.lambda(b7,noramlize_by_rowsum, f7);
@@ -208,7 +207,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   // for (x in 1:X){ 
   //   log(mrate[s,i,x]) <- b0[s] + b1[s,x] + b2[s,i]*b3[s,x] 
   // } 
-  //m.link<Lambda4>(mrate, update_mrate, b0,b1,b2,b3);
+  m.lambda<Cube<double>, vec, mat, mat, mat>(mrate, update_mrate, b0,b1,b2,b3);
 
   // # poisson likelihood
   // for (x in 1:X){ 
