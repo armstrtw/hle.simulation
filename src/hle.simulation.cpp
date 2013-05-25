@@ -33,7 +33,7 @@ Cube<double> update_mrate(const vec& b0, const arma::Mat<double>& b1, const arma
   return 1/(1+exp(-ans));
 }
 
-Cube<double> update_prob(vec& b4, mat& b5, mat& b6, mat& b7) {
+Cube<double> update_prob(const vec& b4, const mat& b5, const mat& b6, const mat& b7) {
   Cube<double> ans;
   for(int s = 0; s < b4.n_elem; ++s) {
     for(int i = 0; i < b6.n_cols; ++i) {
@@ -216,7 +216,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   // for (x in 1:M){ 
   //   logit(prob[s,i,x])  <- b4[s]  + b5[s,x]  + b6[s,i]*b7[s,x]
   // } 
-  //m.link<Lambda4>(prob,update_prob,b4,b5,b6,b7);
+  m.lambda<Cube<double>,vec, mat, mat, mat>(prob,update_prob,b4,b5,b6,b7);
 
   // # binomial likelihood
   // for (x in 1:M){   
