@@ -13,7 +13,7 @@
 //#include <cppbugs/deterministics/mcmc.linear.grouped.hpp>
 //#include <cppbugs/deterministics/mcmc.linear.hpp>
 //#include <cppbugs/deterministics/mcmc.rsquared.hpp>
-#include <cppbugs/deterministics/mcmc.lambda1.hpp>
+#include <cppbugs/deterministics/mcmc.lambda.hpp>
 #include <cppbugs/mcmc.model.hpp>
 
 using namespace arma;
@@ -83,6 +83,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   vec b4(S);
   mat b5(S,M);
   mat b6(S,N);
+  mat b7(S,M);
 
   mat f3(S,X);
   mat f7(S,M);
@@ -201,7 +202,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //m.link<Lambda1>(b3,noramlize_by_rowsum,f3);
   m.lambda(b3,noramlize_by_rowsum,f3);
   m.link<Gamma>(f7,1,1);
-  //m.link<Lambda1>(b7,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f7);
+  m.lambda(b7,noramlize_by_rowsum, f7);
 
   // # poisson link function
   // for (x in 1:X){ 
