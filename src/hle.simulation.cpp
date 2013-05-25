@@ -47,17 +47,11 @@ Cube<double> update_prob(vec& b4, mat& b5, mat& b6, mat& b7) {
 }
 
 
-std::function<const mat (const mat&)> noramlize_by_rowsum = [](const mat& x) {
+mat normalize_by_rowsum(const mat& x) {
   const uvec z(zeros<uvec>(x.n_cols));
   colvec rs = sum(x,1);
   return x / rs.cols(z);
-};
-
-// mat noramlize_by_rowsum(const mat& x) {
-//   const uvec z(zeros<uvec>(x.n_cols));
-//   colvec rs = sum(x,1);
-//   return x / rs.cols(z);
-// }
+}
 
 SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<double>& nr_healthy, const Cube<double>& nr_resp, const vec& adj_geo, const vec& numNeigh_geo, const int sumNumNeigh_geo) {
   // sex  s = 0,1
@@ -199,9 +193,9 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //   f7[s,x] ~ dgamma(1,1)
   // }}
   m.link<Gamma>(f3,1,1);
-  m.lambda(b3,noramlize_by_rowsum,f3);
+  m.lambda<mat,mat>(b3,normalize_by_rowsum,f3);
   m.link<Gamma>(f7,1,1);
-  m.lambda(b7,noramlize_by_rowsum, f7);
+  m.lambda<mat,mat>(b7,normalize_by_rowsum, f7);
 
   // # poisson link function
   // for (x in 1:X){ 
@@ -214,7 +208,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //  gamma[s,i,x] <- pop[s,i,x] * mrate[s,i,x]
   //  deaths[s,i,x] ~ dpois(gamma[s,i,x])
   // }
-  //m.link<Lambda2>(gamma, [](const Cube<double>& x, const Cube<double>& y) { return x % y; }, pop, mrate);
+  m.lambda<Cube<double>, Cube<double>, Cube<double> >(gamma, [](const Cube<double>& x, const Cube<double>& y) { return x % y; }, pop, mrate);
   //m.link<Poisson>(deaths,gamma);
 
 
