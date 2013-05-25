@@ -9,9 +9,11 @@
 #include <cppbugs/cppbugs.hpp>
 #include <cppbugs/distributions/mcmc.wishart.hpp>
 #include <cppbugs/distributions/mcmc.mvcar.hpp>
-#include <cppbugs/deterministics/mcmc.linear.grouped.hpp>
-#include <cppbugs/deterministics/mcmc.linear.hpp>
-#include <cppbugs/deterministics/mcmc.rsquared.hpp>
+#include <cppbugs/distributions/mcmc.poisson.hpp>
+//#include <cppbugs/deterministics/mcmc.linear.grouped.hpp>
+//#include <cppbugs/deterministics/mcmc.linear.hpp>
+//#include <cppbugs/deterministics/mcmc.rsquared.hpp>
+#include <cppbugs/deterministics/mcmc.lambda1.hpp>
 #include <cppbugs/mcmc.model.hpp>
 
 using namespace arma;
@@ -184,45 +186,45 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //   f7[s,x] ~ dgamma(1,1)
   // }}
   m.link<Gamma>(f3,1,1);
-  m.link<Lambda1>(b3,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f3);
+  //m.link<Lambda1>(b3,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f3);
   m.link<Gamma>(f7,1,1);
-  m.link<Lambda1>(b7,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f7);
+  //m.link<Lambda1>(b7,[](vec x) { const uvec z(zeros<uvec>(x.n_cols)); colvec rs = sum(x,1); return x / rs.cols(z); }, f7);
 
   // # poisson link function
   // for (x in 1:X){ 
   //   log(mrate[s,i,x]) <- b0[s] + b1[s,x] + b2[s,i]*b3[s,x] 
   // } 
-  m.link<Lambda4>(mrate, update_mrate, b0,b1,b2,b3);
+  //m.link<Lambda4>(mrate, update_mrate, b0,b1,b2,b3);
 
   // # poisson likelihood
   // for (x in 1:X){ 
   //  gamma[s,i,x] <- pop[s,i,x] * mrate[s,i,x]
   //  deaths[s,i,x] ~ dpois(gamma[s,i,x])
   // }
-  m.link<product>(gamma, pop, mrate);
-  m.link<Poisson>(deaths,gamma);
+  //m.link<Lambda2>(gamma, [](const Cube<double>& x, const Cube<double>& y) { return x % y; }, pop, mrate);
+  //m.link<Poisson>(deaths,gamma);
 
 
   // # binomial link function
   // for (x in 1:M){ 
   //   logit(prob[s,i,x])  <- b4[s]  + b5[s,x]  + b6[s,i]*b7[s,x]
   // } 
-  m.link<Lambda4>(prob,update_prob,b4,b5,b6,b7);
+  //m.link<Lambda4>(prob,update_prob,b4,b5,b6,b7);
 
   // # binomial likelihood
   // for (x in 1:M){   
   //    nr.healthy[s,i,x] ~ dbin(prob[s,i,x], nr.resp[s,i,x])
   // }  
-  m.link<Binomial>(nr_healthy,prob,nr_resp);
+  //m.link<ObservedBinomial>(nr_healthy,prob,nr_resp);
 
 
-  std::vector<vec>& b0_hist = m.track<std::vector>(b0);
-  std::vector<vec>& b1_hist = m.track<std::vector>(b1);
-  std::vector<vec>& b2_hist = m.track<std::vector>(b2);
-  std::vector<vec>& b3_hist = m.track<std::vector>(b3);
-  std::vector<vec>& b4_hist = m.track<std::vector>(b4);
-  std::vector<vec>& b5_hist = m.track<std::vector>(b5);
-  std::vector<vec>& b6_hist = m.track<std::vector>(b6);
+  std::vector<arma::vec>& b0_hist = m.track<std::vector>(b0);
+  std::vector<arma::mat>& b1_hist = m.track<std::vector>(b1);
+  std::vector<arma::mat>& b2_hist = m.track<std::vector>(b2);
+  std::vector<arma::mat>& b3_hist = m.track<std::vector>(b3);
+  std::vector<arma::vec>& b4_hist = m.track<std::vector>(b4);
+  std::vector<arma::mat>& b5_hist = m.track<std::vector>(b5);
+  std::vector<arma::mat>& b6_hist = m.track<std::vector>(b6);
 
   m.tune(1e4,100);
   m.tune_global(1e4,100);
@@ -230,8 +232,8 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   m.sample(1e5, 10);
 
   cout << "b: " << endl << mean(b0_hist.begin(),b0_hist.end()) << endl;
-  cout << "samples: " << b_hist.size() << endl;
+  cout << "samples: " << b0_hist.size() << endl;
   cout << "acceptance_ratio: " << m.acceptance_ratio() << endl;
 
-  return 0;
+  return R_NilValue;
 }
