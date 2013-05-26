@@ -209,7 +209,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   //  deaths[s,i,x] ~ dpois(gamma[s,i,x])
   // }
   m.lambda<Cube<double>, Cube<double>, Cube<double> >(gamma, [](const Cube<double>& x, const Cube<double>& y) { return x % y; }, pop, mrate);
-  //m.link<Poisson>(deaths,gamma);
+  m.link<ObservedPoisson>(deaths,gamma);
 
 
   // # binomial link function
