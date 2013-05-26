@@ -222,7 +222,7 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   // for (x in 1:M){   
   //    nr.healthy[s,i,x] ~ dbin(prob[s,i,x], nr.resp[s,i,x])
   // }  
-  //m.link<ObservedBinomial>(nr_healthy,prob,nr_resp);
+  m.link<ObservedBinomial>(nr_healthy,prob,nr_resp);
 
 
   std::vector<arma::vec>& b0_hist = m.track<std::vector>(b0);
