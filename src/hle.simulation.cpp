@@ -53,7 +53,7 @@ mat normalize_by_rowsum(const mat& x) {
   return x / rs.cols(z);
 }
 
-SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<double>& nr_healthy, const Cube<double>& nr_resp, const vec& adj_geo, const vec& numNeigh_geo, const int sumNumNeigh_geo) {
+SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<double>& nr_healthy, const Cube<double>& nr_resp, const vec& adj_geo, const vec& numNeigh_geo, const int sumNumNeigh_geo,  vec b0,  mat b1,  mat b2,  mat b3,  vec b4,  mat b5,  mat b6,  mat b7, mat tau_b1,  mat tau_b2,  mat tau_b5,  mat tau_b6) {
   // sex  s = 0,1
   // area i = 0..(N-1)
   // ages x = 0..(X-1)
@@ -70,22 +70,8 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   Cube<double> prob(S,N,M);
   //Cube<double> nr_resp(S,N,M);
 
-  vec b0(S);
-  mat b1(S,X);
-  mat b2(S,N);
-  mat b3(S,X);
-  vec b4(S);
-  mat b5(S,M);
-  mat b6(S,N);
-  mat b7(S,M);
-
   mat f3(S,X);
   mat f7(S,M);
-
-  mat tau_b1(2,2);
-  mat tau_b2(2,2);
-  mat tau_b5(2,2);
-  mat tau_b6(2,2);
 
   vec weight_geo(sumNumNeigh_geo);
   weight_geo.fill(1);
@@ -243,4 +229,33 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   cout << "acceptance_ratio: " << m.acceptance_ratio() << endl;
 
   return R_NilValue;
+}
+
+SEXP hle(SEXP pop_, SEXP deaths_, SEXP nr_healthy_, SEXP nr_resp_, SEXP adj_geo_, SEXP numNeigh_geo_, SEXP sumNumNeigh_geo_,  SEXP b0_,  SEXP b1_,  SEXP b2_,  SEXP b3_,  SEXP b4_,  SEXP b5_,  SEXP b6_,  SEXP b7_, SEXP tau_b1_,  SEXP tau_b2_,  SEXP tau_b5_,  SEXP tau_b6_) {
+
+  const Cube<double> pop; //= as< Cube<double> >(pop_);
+  const Cube<double> deaths; //=  as< Cube<double> >(deaths_);
+  const Cube<double> nr_healthy; //= as< Cube<double> >(nr_healthy_);
+  const Cube<double> nr_resp; //= as< Cube<double> >(nr_resp_);
+  const vec adj_geo(Rcpp::as<vec>(adj_geo_));
+  const vec numNeigh_geo(Rcpp::as<vec>(numNeigh_geo_));
+  const int sumNumNeigh_geo(Rcpp::as<int>(sumNumNeigh_geo_));
+
+  vec b0 = Rcpp::as<vec>(b0_);
+  mat b1 =  Rcpp::as<mat>(b1_);
+  mat b2 = Rcpp::as<mat>(b2_);
+  mat b3 = Rcpp::as<mat>(b3_);
+  vec b4 = Rcpp::as<vec>(b4_);
+  mat b5 = Rcpp::as<mat>(b5_);
+  mat b6 = Rcpp::as<mat>(b6_);
+  mat b7 = Rcpp::as<mat>(b7_);
+
+  mat tau_b1 = Rcpp::as<mat>(tau_b1_);
+  mat tau_b2 = Rcpp::as<mat>(tau_b2_);
+  mat tau_b5 = Rcpp::as<mat>(tau_b5_);
+  mat tau_b6 = Rcpp::as<mat>(tau_b6_);
+
+  // FIXME: checks for matching dimensions of coefs to data...
+
+  return run_hle(pop, deaths, nr_healthy, nr_resp, adj_geo, numNeigh_geo, sumNumNeigh_geo,  b0, b1, b2, b3, b4, b5, b6, b7, tau_b1, tau_b2, tau_b5, tau_b6);
 }
