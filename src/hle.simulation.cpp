@@ -242,7 +242,7 @@ const Cube<double> toCube(SEXP x) {
   return cube(REAL(x),INTEGER(dim_)[0],INTEGER(dim_)[1],INTEGER(dim_)[2],false,true);
 }
 
-SEXP hle(SEXP pop_, SEXP deaths_, SEXP nr_healthy_, SEXP nr_resp_, SEXP adj_geo_, SEXP numNeigh_geo_, SEXP sumNumNeigh_geo_,  SEXP b0_,  SEXP b1_,  SEXP b2_,  SEXP f3_,  SEXP b4_,  SEXP b5_,  SEXP b6_,  SEXP f7_, SEXP tau_b1_,  SEXP tau_b2_,  SEXP tau_b5_,  SEXP tau_b6_) {
+extern "C" SEXP hle(SEXP pop_, SEXP deaths_, SEXP nr_healthy_, SEXP nr_resp_, SEXP adj_geo_, SEXP numNeigh_geo_, SEXP sumNumNeigh_geo_,  SEXP b0_,  SEXP b1_,  SEXP b2_,  SEXP f3_,  SEXP b4_,  SEXP b5_,  SEXP b6_,  SEXP f7_, SEXP tau_b1_,  SEXP tau_b2_,  SEXP tau_b5_,  SEXP tau_b6_) {
 
   const Cube<double> pop(toCube(pop_));
   const Cube<double> deaths(toCube(deaths_));
