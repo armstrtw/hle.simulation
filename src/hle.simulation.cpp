@@ -231,12 +231,23 @@ SEXP run_hle(const Cube<double>& pop, const Cube<double>& deaths, const Cube<dou
   return R_NilValue;
 }
 
+const Cube<double> toCube(SEXP x) {
+  if(TYPEOF(x)!=REALSXP) {
+    throw std::logic_error("not a real valued array.");
+  }
+  SEXP dim_ = Rf_getAttrib(x,R_DimSymbol);
+  if(Rf_length(dim_) != 3) {
+    throw std::logic_error("not a cube.");
+  }
+  return cube(REAL(x),INTEGER(dim_)[0],INTEGER(dim_)[1],INTEGER(dim_)[2],false,true);
+}
+
 SEXP hle(SEXP pop_, SEXP deaths_, SEXP nr_healthy_, SEXP nr_resp_, SEXP adj_geo_, SEXP numNeigh_geo_, SEXP sumNumNeigh_geo_,  SEXP b0_,  SEXP b1_,  SEXP b2_,  SEXP b3_,  SEXP b4_,  SEXP b5_,  SEXP b6_,  SEXP b7_, SEXP tau_b1_,  SEXP tau_b2_,  SEXP tau_b5_,  SEXP tau_b6_) {
 
-  const Cube<double> pop; //= as< Cube<double> >(pop_);
-  const Cube<double> deaths; //=  as< Cube<double> >(deaths_);
-  const Cube<double> nr_healthy; //= as< Cube<double> >(nr_healthy_);
-  const Cube<double> nr_resp; //= as< Cube<double> >(nr_resp_);
+  const Cube<double> pop(toCube(pop_));
+  const Cube<double> deaths(toCube(deaths_));
+  const Cube<double> nr_healthy(toCube(nr_healthy_));
+  const Cube<double> nr_resp(toCube(nr_resp_));
   const vec adj_geo(Rcpp::as<vec>(adj_geo_));
   const vec numNeigh_geo(Rcpp::as<vec>(numNeigh_geo_));
   const int sumNumNeigh_geo(Rcpp::as<int>(sumNumNeigh_geo_));
